@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steganography - Decryption</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #141e30, #243b55);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            font-size: 2.5rem;
+            animation: fadeIn 2s ease-in-out;
+        }
+        p {
+            font-size: 1.2rem;
+            text-align: center;
+        }
+        input, button {
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+        }
+        input {
+            width: 250px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+        button:hover {
+            background-color: #218838;
+            transform: scale(1.05);
+        }
+        button:disabled {
+            background-color: gray;
+            cursor: not-allowed;
+        }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #passwordSection {
+            display: none;
+            margin-top: 20px;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+<body>
+    <h1>Steganography - Decryption</h1>
+    <p>Upload an encrypted image to retrieve the hidden message.</p>
+    <input type="file" id="decryptImageInput" accept="image/*"><br><br>
+    <button id="decryptButton">Decrypt</button>
+    <p id="result"></p>
+
+    <div id="passwordSection">
+        <h2>Password</h2>
+        <input type="password" id="passwordInput" placeholder="Enter the hidden message" disabled>
+        <br><br>
+        <button id="verifyButton" disabled>Verify</button>
+    </div>
+
+    <script>
+        function aesDecryptMultipleTimes(encryptedText, key, times) {
+            let decrypted = encryptedText;
+            for (let i = 0; i < times; i++) {
+                let bytes = CryptoJS.AES.decrypt(decrypted, key);
+                decrypted = bytes.toString(CryptoJS.enc.Utf8);
+                if (!decrypted) return "Decryption failed";
+            }
+            return decrypted;
+        }
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        let hiddenMessage = "";
+        const encryptionKey = "mysecurekey123";
+
+        document.getElementById('decryptButton').addEventListener('click', () => {
+            const fileInput = document.getElementById('decryptImageInput').files[0];
+            if (!fileInput) {
+                alert('Please upload an encrypted image.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const img = new Image();
+                img.onload = function () {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const pixels = imageData.data;
+
+                    hiddenMessage = '';
+                    for (let i = 0; i < pixels.length; i += 4) {
+                        if (pixels[i] === 0) break;
+                        hiddenMessage += String.fromCharCode(pixels[i]);
+                    }
+
+                    if (hiddenMessage) {
+                        let decryptedMessage = aesDecryptMultipleTimes(hiddenMessage, encryptionKey, 4);
+                        //document.getElementById('result').textContent = decryptedMessage;
+                        document.getElementById('passwordSection').style.display = 'block';
+                        let maskedMessage = "•".repeat(decryptedMessage.length);
+                        document.getElementById('passwordInput').value = maskedMessage;
+                        document.getElementById('passwordInput').dataset.actualPassword = decryptedMessage;
+                        document.getElementById('verifyButton').disabled = decryptedMessage.length !== 8;
+                    } else {
+                        document.getElementById('result').textContent = "No hidden message found.";
+                        document.getElementById('passwordSection').style.display = 'none';
+                    }
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(fileInput);
+        });
+
+        document.getElementById('verifyButton').addEventListener('click', () => {
+            if (document.getElementById('passwordInput').dataset.actualPassword.length === 8) {
+                window.location.href = "http://127.0.0.1:5500/amazon.html";
+            }
+        });
+    </script>
+</body>
+</html>

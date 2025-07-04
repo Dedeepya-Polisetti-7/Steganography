@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SECURE WEBSITE</title>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script>
+        window.onload = function () {
+            emailjs.init("XYxAa-o50CaJQlxjq");  // Replace with your secure EmailJS Public Key
+        };
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #141e30, #243b55);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2.5rem;
+            animation: fadeIn 2s ease-in-out;
+        }
+        h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 2s ease-in-out;
+            width: 47%;
+            text-align: left;
+        }
+        li {
+            margin: 10px 0;
+            font-size: 1.2rem;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-size: 1.1rem;
+        }
+        input[type="checkbox"] {
+            transform: scale(1.2);
+            margin-right: 8px;
+        }
+        button {
+            padding: 12px 20px;
+            font-size: 1.2rem;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            background-color: gray;
+            color: white;
+            cursor: not-allowed;
+            transition: background 0.3s, transform 0.2s;
+            margin-top: 20px;
+        }
+        button.enabled {
+            background-color: #28a745;
+            cursor: pointer;
+        }
+        button.enabled:hover {
+            background-color: #218838;
+            transform: scale(1.05);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to the  ShopEase</h1>
+    <h3>Instructions:</h3>
+    <ul>
+        <li>🔒 Do not try to alter or manipulate website data.</li>
+        <li>⚠ Avoid performing any malicious activities.</li>
+        <li>🔑 Use only strong passwords when logging in.</li>
+        <li>❌ Never share your passwords with anyone.</li>
+        <li>🚫 Be cautious while clicking on unknown links.</li>
+        <li>📶 Always log in from a trusted network to prevent security risks.</li>
+        <li>🔍 Regularly check for suspicious activity on your account.</li>
+        <li>✅ Enable two-factor authentication (2FA) whenever possible.</li>
+        <li>🔄 Keep your browser and software updated to avoid vulnerabilities.</li>
+        <label>
+            <input type="checkbox" id="enableCheckbox">
+            I agree with all the above instructions.
+        </label>
+    </ul>
+    
+    <a href="http://127.0.0.1:5500/ips2.html">
+        <button id="actionButton" disabled>Continue</button>
+    </a>
+
+    <script>
+        const checkbox = document.getElementById('enableCheckbox');
+        const button = document.getElementById('actionButton');
+
+        checkbox.addEventListener('change', function () {
+            button.disabled = !checkbox.checked;
+            button.classList.toggle("enabled", checkbox.checked);
+        });
+
+        let suspiciousCount = 0;
+        document.addEventListener('click', () => checkForSuspiciousActivity());
+        document.addEventListener('keydown', () => checkForSuspiciousActivity());
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            alert('Right-click is disabled for security reasons!');
+            checkForSuspiciousActivity();
+        });
+
+        function checkForSuspiciousActivity() {
+            suspiciousCount++;
+            if (suspiciousCount > 5) {
+                alert('⚠ Multiple suspicious activities detected! You will be redirected.');
+                sendSuspiciousActivityEmail();
+                window.location.href = "http://127.0.0.1:5500/error_page.html";
+            }
+        }
+
+        function sendSuspiciousActivityEmail() {
+            emailjs.send("service_ddoja3f", "template_siy2aej", {
+                to_email: "sampathsilaparasetti2004@gmail.com",  
+                from_name: "Sampath",
+                message: "Multiple suspicious activities have been detected on the website. Please investigate immediately."
+            }).then(
+                function(response) {
+                    console.log(" Email sent successfully!", response.status, response.text);
+                },
+                function(error) {
+                    console.error(" Failed to send email:", error);
+                }
+            );
+        }
+    </script>
+</body>
+</html>

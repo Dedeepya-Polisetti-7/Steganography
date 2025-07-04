@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopEase - Your Online Store</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background-color: #333;
+            color: white;
+            padding: 15px;
+            font-size: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cart {
+            font-size: 18px;
+            cursor: pointer;
+            padding: 10px;
+            background: #ff9800;
+            border-radius: 5px;
+            transition: transform 0.2s ease-in-out;
+        }
+        .cart:hover {
+            transform: scale(1.1);
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 20px;
+        }
+        .product {
+            background: white;
+            padding: 15px;
+            margin: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .product img {
+            width: 100%;
+            border-radius: 8px;
+        }
+        .product .details {
+            flex-grow: 1;
+        }
+        .product input {
+            width: 50px;
+            text-align: center;
+            margin: 5px;
+        }
+        .product button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: auto;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .product button:hover {
+            background-color: #218838;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        ShopEase - Your Online Store
+        <span class="cart" onclick="viewCart()">🛒 Cart: <span id="cartCount">0</span></span>
+    </div>
+    
+    <div class="container" id="products"></div>
+
+    <script>
+        const products = [
+            { name: "Laptop", price: 899, image: "img/laptop.jpg" },
+            { name: "Smartphone", price: 699, image: "img/smartphone.jpg" }
+        ];
+        
+        let cart = {};
+
+        function addToCart(index) {
+            const quantity = parseInt(document.getElementById(`quantity-${index}`).value) || 1;
+            if (cart[products[index].name]) {
+                cart[products[index].name].quantity += quantity;
+            } else {
+                cart[products[index].name] = { ...products[index], quantity };
+            }
+            updateCartCount();
+        }
+
+        function updateCartCount() {
+            let totalItems = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById("cartCount").innerText = totalItems;
+            localStorage.setItem("cart", JSON.stringify(cart));
+        }
+
+        function viewCart() {
+            window.location.href = "secondPage.html";
+        }
+
+        function loadProducts() {
+            const container = document.getElementById("products");
+            products.forEach((product, index) => {
+                const productElement = document.createElement("div");
+                productElement.classList.add("product");
+                productElement.innerHTML = `
+                    <img src="${product.image}" alt="${product.name}">
+                    <div class="details">
+                        <h3>${product.name}</h3>
+                        <p>$${product.price}</p>
+                        <input type="number" id="quantity-${index}" value="1" min="1">
+                    </div>
+                    <button onclick="addToCart(${index})">Add to Cart</button>
+                `;
+                container.appendChild(productElement);
+            });
+        }
+        
+        loadProducts();
+    </script>
+</body>
+</html>

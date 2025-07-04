@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steganography - Auto Encrypt & Download</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #141e30, #243b55);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            font-size: 2.5rem;
+            animation: fadeIn 2s ease-in-out;
+        }
+        p {
+            font-size: 1.2rem;
+            text-align: center;
+        }
+        input, button {
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+        button:hover {
+            background-color: #218838;
+            transform: scale(1.05);
+        }
+        canvas {
+            display: none;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <h1>Steganography - Encryption</h1>
+    <p>Upload an image. A hidden encrypted message will be embedded and the image will download automatically.</p>
+    <input type="file" id="imageInput" accept="image/*"><br><br>
+    <button id="encryptButton">Encrypt and Save Image</button>
+    <canvas id="canvas"></canvas>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+        function aesEncryptMultipleTimes(text, key, times) {
+            let encrypted = text;
+            for (let i = 0; i < times; i++) {
+                encrypted = CryptoJS.AES.encrypt(encrypted, key).toString();
+            }
+            return encrypted;
+        }
+
+        function generateRandomMessage(length = 8) {
+            const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:',.<>?";
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                const randomIndex = Math.floor(Math.random() * charset.length);
+                result += charset[randomIndex];
+            }
+            return result;
+        }
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        document.getElementById('encryptButton').addEventListener('click', () => {
+            const fileInput = document.getElementById('imageInput').files[0];
+            const encryptionKey = "mysecurekey123";
+
+            if (!fileInput) {
+                alert('Please upload an image.');
+                return;
+            }
+
+            let message = generateRandomMessage();
+            let encryptedMessage = aesEncryptMultipleTimes(message, encryptionKey, 4);
+
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const img = new Image();
+                img.onload = function () {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const pixels = imageData.data;
+
+                    for (let i = 0; i < encryptedMessage.length && i * 4 < pixels.length; i++) {
+                        pixels[i * 4] = encryptedMessage.charCodeAt(i); 
+                    }
+                    pixels[encryptedMessage.length * 4] = 0; 
+
+                    ctx.putImageData(imageData, 0, 0);
+
+                    // Auto download
+                    const link = document.createElement('a');
+                    link.href = canvas.toDataURL("image/png");
+                    link.download = "encrypted-image.png";
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(fileInput);
+        });
+    </script>
+</body>
+</html>
